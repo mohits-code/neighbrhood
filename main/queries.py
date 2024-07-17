@@ -16,15 +16,17 @@ def find_businesses_within_distance(latitude, longitude, distance):
         conn = psycopg2.connect(**db_params)
         cur = conn.cursor()
 
-        # Query to find businesses within the specified distance (using SRID 3857 for meters)
+        # Query to find businesses within the specified distance (using SRID 3857 for meter-based distance)
         query = '''
-        SELECT name
+        SELECT name, ST_Y(geom::geometry) AS latitude, ST_X(geom::geometry) AS longitude, relevancy_score
         FROM businesses
         WHERE ST_DWithin(
             ST_Transform(geom, 3857),  -- Transform to SRID 3857 for meter-based distance
             ST_Transform(ST_SetSRID(ST_MakePoint(%s, %s), 4326), 3857),
             %s
-        );
+        )
+        ORDER BY relevancy_score DESC
+        LIMIT 15;
         '''
 
         # Execute the query
@@ -40,16 +42,3 @@ def find_businesses_within_distance(latitude, longitude, distance):
     except Exception as e:
         print(f"Error: {e}")
         return []
-
-def main():
-    # Example usage
-    latitude = 39.9526   # Replace with your actual latitude
-    longitude = -75.1652 # Replace with your actual longitude
-    distance = 10   # Replace with the desired distance in meters
-
-    businesses = find_businesses_within_distance(latitude, longitude, distance)
-    for business in businesses:
-        print(business)
-
-if __name__ == "__main__":
-    main()

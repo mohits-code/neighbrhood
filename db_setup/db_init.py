@@ -26,8 +26,9 @@ CREATE TABLE IF NOT EXISTS businesses (
     postal_code VARCHAR(20),
     latitude FLOAT,
     longitude FLOAT,
-    geom GEOMETRY(Point, 4326),  -- Example column for storing point data with PostGIS
+    geom GEOMETRY(Point, 4326),
     stars FLOAT,
+    review_count INT, 
     attributes JSONB,
     categories VARCHAR(512),
     hours JSONB
@@ -55,11 +56,11 @@ with open('businesses.json', 'r', encoding='utf-8') as file:
                 cur.execute('''
                 INSERT INTO businesses (
                     business_id, name, address, state, postal_code,
-                    latitude, longitude, geom, stars, attributes, categories, hours
+                    latitude, longitude, geom, stars, review_count, attributes, categories, hours
                 ) VALUES (
                     %(business_id)s, %(name)s, %(address)s, %(state)s, %(postal_code)s,
                     %(latitude)s, %(longitude)s, ST_SetSRID(ST_GeomFromText(%(point)s), 4326),
-                    %(stars)s, %(attributes)s::jsonb, %(categories)s, %(hours)s::jsonb
+                    %(stars)s, %(review_count)s, %(attributes)s::jsonb, %(categories)s, %(hours)s::jsonb
                 )
                 ON CONFLICT (business_id) DO NOTHING;
                 ''', {'point': point, **data})
