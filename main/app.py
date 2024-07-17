@@ -5,13 +5,13 @@ import folium
 from streamlit_folium import st_folium
 
 def main():
-    st.title("Welcome to the Neighborhood")
+    st.title("welcome to neighbrhood")
 
     # Input for address
-    address = st.text_input("Enter the address:")
+    address = st.text_input("enter your location:").lower()
     
     # Input for distance
-    distance = st.number_input("Enter distance in meters:", min_value=0, value=100, step=1)
+    distance = st.number_input("enter searching distance:", min_value=0, value=100, step=1)
 
     # Create a session state variable to store results
     if 'businesses' not in st.session_state:
@@ -20,11 +20,11 @@ def main():
         st.session_state['longitude'] = None
 
     # When the user clicks the button, geocode the address and find businesses
-    if st.button("Search"):
+    if st.button("search"):
         if address:
             latitude, longitude = geocode_address(address)
             if latitude is None or longitude is None:
-                st.error("Could not geocode the address. Please try again.")
+                st.error("could not geocode the address. please try again.")
             else:
                 businesses = find_businesses_within_distance(latitude, longitude, distance)
                 st.session_state['businesses'] = businesses
@@ -38,10 +38,10 @@ def main():
         longitude = st.session_state['longitude']
         
         if businesses:
-            st.success(f"Businesses within {distance:.2f} meters of '{address}':")
+            st.success(f"businesses within {distance:.2f} meters of '{address}':")
             business_data = []
             for business in businesses:
-                st.write(f"- {business[0]}")
+                st.write(f"- {business[0].lower()}")
                 business_data.append({'name': business[0], 'latitude': business[1], 'longitude': business[2]})
 
             # Create a map centered around the searched address
@@ -49,20 +49,20 @@ def main():
             m = folium.Map(location=map_center, zoom_start=15)
             
             # Add a marker for the searched address
-            folium.Marker([latitude, longitude], tooltip="Searched Address", icon=folium.Icon(color='blue')).add_to(m)
+            folium.Marker([latitude, longitude], tooltip="searched address", icon=folium.Icon(color='blue')).add_to(m)
 
             # Add markers for the businesses
             for data in business_data:
                 folium.Marker(
                     [data['latitude'], data['longitude']],
-                    tooltip=data['name'],
+                    tooltip=data['name'].lower(),
                     icon=folium.Icon(color='green')
                 ).add_to(m)
 
             # Display the map
             st_folium(m, width=700, height=500)
         else:
-            st.info("No businesses found within the specified distance.")
+            st.info("no businesses found within the specified distance.")
 
 if __name__ == "__main__":
     main()
